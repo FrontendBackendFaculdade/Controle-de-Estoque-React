@@ -37,8 +37,6 @@ model Produtos{
 model Cliente{
   codigo Int @id @default(autoincrement())
   nome String
-  razaoSocial String
-  cnpjCpf String
   numeroTelefone String
   ativo String
 
@@ -54,8 +52,6 @@ model Cliente{
 model FormaDePagamento{
   codigo Int @id @default(autoincrement())
   nome String
-  tipoTroco String
-  prazo String
   ativo String
 
   CondicaoPagamento CondicaoPagamento[]
