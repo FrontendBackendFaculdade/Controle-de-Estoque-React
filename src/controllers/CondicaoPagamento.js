@@ -26,5 +26,36 @@ export default{
                 message: error.message
             })
         }
+    },
+
+    async listCondicao(request, response){
+        try{
+            const condicao = await prisma.CondicaoPagamento.findMany()
+            return response.json(condicao)
+        }catch(error){
+            return response.status(500).json({
+                message: error.message
+            })
+        }
+    },
+
+    async findCondicao(request, response){
+        try{
+
+            const {codigo} = request.params;
+
+
+            const condicao = await prisma.CondicaoPagamento.findfisrt({
+                where: {codigo: Number(codigo)}
+            });
+
+            if(!condicao){
+                return
+            }
+        }catch(error){
+            return response.status(500).json({
+                message: error.message
+            })
+        }
     }
 }
