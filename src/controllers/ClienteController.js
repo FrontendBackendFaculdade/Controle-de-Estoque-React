@@ -68,8 +68,6 @@ export default {
 
             const {
                 nome,
-                razaoSocial,
-                cnpjCpf,
                 numeroTelefone,
                 ativo
             } = request.body;
@@ -86,8 +84,6 @@ export default {
 
             const clienteAtualizado = {
                 nome: nome !== undefined ? nome: undefined,
-                razaoSocial: razaoSocial !== undefined ? razaoSocial: undefined,
-                cnpjCpf: cnpjCpf !== undefined ? cnpjCpf: undefined,
                 numeroTelefone: numeroTelefone !== undefined ? numeroTelefone: undefined,
                  ativo: ativo !== undefined ? String(ativo) : undefined  // se for string no schema
             };
