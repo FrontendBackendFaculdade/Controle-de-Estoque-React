@@ -68,6 +68,7 @@ model FormaDePagamento{
 
 model CondicaoPagamento{
   codigo Int @id @default(autoincrement())
+  descricao String
   codPagamento Int
   quantidadeParcela Int
   parcelaInicial Int

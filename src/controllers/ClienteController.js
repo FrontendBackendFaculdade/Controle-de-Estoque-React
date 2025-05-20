@@ -8,19 +8,14 @@ export default {
         try {
             const {
                 nome,
-                razaoSocial,
-                cnpjCpf,
                 numeroTelefone,
-                ativo
             } = request.body;
 
             await prisma.Cliente.create({
                 data: {
                     nome,
-                    razaoSocial,
-                    cnpjCpf,
                     numeroTelefone,
-                    ativo
+                    ativo: "SIM"
                 }
             });
 
@@ -37,7 +32,7 @@ export default {
     async listClientes (request, response) {
         try{
             const cliente = await prisma.Cliente.findMany();
-            return response.json(forma)
+            return response.json(cliente)
         }catch(error){
             return response.status(500).json({
                 message: error.message
@@ -49,7 +44,7 @@ export default {
         try{
             const {codigo} = request.params;
 
-            const cliente = await prisma.Cliente.findFirst()({
+            const cliente = await prisma.Cliente.findFirst({
                 where: { codigo: Number(codigo)}
             });
 
@@ -136,7 +131,7 @@ export default {
             });
 
             return response.json({
-                message: "Produto atualizado com sucesso"
+                message: "Produto excluido com sucesso"
             });
         }catch(error){
             return response.status(500).json({
