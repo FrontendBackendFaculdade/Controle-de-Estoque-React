@@ -9,19 +9,16 @@ const prisma = new PrismaClient();
 export default {
     async cadastrarForma(request, response){
         try{
+            const criandoAtivo = "SIM"
+            
             const {
-                nome,
-                tipoTroco,
-                prazo,
-                ativo
+                nome
             } = request.body;
 
             await prisma.FormaDePagamento.create({
                 data: {
                     nome,
-                    tipoTroco,
-                    prazo,
-                    ativo
+                    ativo: "SIM"
                 }
             });
                 return response.status(201).json({message: "Forma de pagamento cadastrada com sucesso"})  
@@ -88,8 +85,6 @@ async findFormadepagamento(request, response) {
     
             const {
                 nome,
-                tipoTroco,
-                prazo,
                 ativo
             } = request.body;
     
@@ -103,8 +98,6 @@ async findFormadepagamento(request, response) {
     
             const formaAtualizada = {
                 nome: nome !== undefined ? nome : undefined,
-                tipoTroco: tipoTroco !== undefined ? tipoTroco : undefined,
-                prazo: prazo !== undefined ? prazo : undefined,
                 ativo: ativo !== undefined ? String(ativo) : undefined  // se for string no schema
             };
     
