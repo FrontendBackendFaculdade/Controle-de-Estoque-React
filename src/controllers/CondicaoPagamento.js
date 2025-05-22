@@ -57,5 +57,5 @@ export default{
                 message: error.message
             })
         }
-    }
+    } // testado pelo Eivold
 }
