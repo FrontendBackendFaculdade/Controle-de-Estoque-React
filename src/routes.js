@@ -1,7 +1,8 @@
 import { Router } from "express";
 import ProdutoController from "./controllers/ProdutoController.js";
 import FormaController from "./controllers/FormaController.js";
-import ClienteController from "./controllers/ClienteController.js";
+import ClienteController from "./controllers/ClienteController.js"
+import CondicaoPagamento from "./controllers/CondicaoPagamento.js";
 
 
 const router = Router();
@@ -29,6 +30,16 @@ router.get('/listclientes', ClienteController.listClientes);
 router.get('/findcliente/:codigo', ClienteController.findCliente);
 router.delete('/deletecliente/:codigo', ClienteController.deleteCliente);
 router.put('/atualizarcliente/:codigo', ClienteController.updateCliente);
+
+
+
+// Rotas das Condiçoes de pagamentos
+
+router.post('/createcondicao', CondicaoPagamento.createCondicao);
+router.get('/listcondicoes', CondicaoPagamento.listCondicao);
+router.get('/condicoes/:codigo', CondicaoPagamento.findCondicao);
+router.put('/atualizarcondicao/:codigo', CondicaoPagamento.updateCondicao);
+router.delete('/deletecondicao/:codigo', CondicaoPagamento.deleteCondicao);
 
 
 
