@@ -144,9 +144,7 @@ export default {
     }
     
     
-    
-    
-    
-atestado por WELDER
+    // Essa controller está finalizada
+
 
 };

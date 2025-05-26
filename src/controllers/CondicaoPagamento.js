@@ -57,5 +57,29 @@ export default{
                 message: error.message
             })
         }
+    },
+
+    async updateCondicao(request, response){
+        try{
+
+        }catch(error){
+            return response.status(500).json({
+                message: error.message
+            })
+        }
+    },
+
+    async deleteCondicao(request, response){
+        try{
+
+        }catch(error){
+            return response.status(500).json({
+                message: error.message
+            })
+        }
     }
+
+
+
+    // Terminar a função de Update e Delete
 }
