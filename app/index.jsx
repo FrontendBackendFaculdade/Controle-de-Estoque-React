@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -16,10 +16,9 @@ import {
     signOut,
 } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
-import {firebaseConfig} from "../firebase"
+import {firebaseConfig} from "../firebase.js";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-
+import { useRouter } from 'expo-router';
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -87,18 +86,12 @@ const styles = {
 };
 
 export default function App() {
-    const [email,
-        setEmail] = useState('');
-    const [password,
-        setPassword] = useState('');
-    const [user,
-        setUser] = useState(null);
-    const [isLogin,
-        setIsLogin] = useState(true);
-    const [error,
-        setError] = useState('');
-
-    const [showPassword, setShowPassword] = useState(true);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [user, setUser] = useState(null);
+    const [isLogin, setIsLogin] = useState(true);
+    const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const toggleShowPassword = () => {
         setShowPassword(!showPassword);
@@ -107,10 +100,10 @@ export default function App() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
-            setError(''); // Clear error on auth state change
+            setError('');
         });
 
-        return () => toggleShowPassword(), unsubscribe();
+        return () => unsubscribe();
     }, []);
 
     const handleAuthentication = async() => {
@@ -146,7 +139,9 @@ export default function App() {
                     isLogin={isLogin}
                     setIsLogin={setIsLogin}
                     handleAuthentication={handleAuthentication}
-                    error={error}/>)}
+                    error={error}
+                    showPassword={showPassword}
+                    toggleShowPassword={toggleShowPassword}/>)}
         </ScrollView>
     );
 }
@@ -211,111 +206,116 @@ const PaginaAuth = ({
     );
 };
 
-const PaginaAuthenticated = ({user, handleAuthentication}) => {
-    const styles2 = ({
+const PaginaAuthenticated = ({handleAuthentication, navigation }) => { 
+    
+    const stylesHome = ({ 
         container: {
-          flex: 1,
-          backgroundColor: '#f0f0f0',
-          padding: 10,
+            flex: 1,
+            backgroundColor: '#f0f0f0',
+            padding: 10,
         },
         header: {
-          padding: 10,
-          marginBottom:10,
-          
+            padding: 10,
+            marginBottom: 10,
         },
         headerText: {
-          fontSize: 24,
-          fontWeight: 'bold',
-          
+            fontSize: 24,
+            fontWeight: 'bold',
         },
         gridContainer: {
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          justifyContent: 'space-around',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-around',
         },
         tile: {
-          width: '45%',
-          height: 150,
-          backgroundColor: 'white',
-          borderRadius: 10,
-          marginBottom: 20,
-          justifyContent:'flex-start',
-          alignItems:'center',
-          borderColor: 'gray',
-          borderWidth: 2,
+            width: '45%',
+            height: 150,
+            backgroundColor: 'white',
+            borderRadius: 10,
+            marginBottom: 20,
+            justifyContent: 'flex-start', 
+            alignItems: 'center',
+            borderColor: 'gray',
+            borderWidth: 2,
+            padding: 10,
         },
         tileContent: {
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          width:'100%',
-          height:'100%',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%',
         },
         tileText: {
-          fontSize: 18,
-          fontWeight: 'bold',
-          marginTop: 10,
+            fontSize: 16, // Ajustado para caber melhor
+            fontWeight: 'bold',
+            marginTop: 10,
+            textAlign: 'center', // Para nomes de app mais longos
         },
         gearButton: {
-          bottom: 20,
-          left: 0,
-          right: 0,
-          marginTop: 35,
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          backgroundColor: '#2196F3',
-          width: 60,
-          height: 60,
-          borderRadius: 20,
-          justifyContent: 'center',
-          alignItems: 'center',
+            position: 'absolute', 
+            bottom: 20,
+            alignSelf: 'center', 
+            backgroundColor: '#2196F3',
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 20, 
         },
-        triangle: {
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-          width: 0,
-          height: 0,
-          backgroundColor: 'transparent',
-          borderStyle: 'solid',
-          borderRightWidth: 40,
-          borderTopWidth: 40,
-          borderRightColor: 'transparent',
-          borderTopColor: '#2196F3',
-        },
-      });
-      const apps = [
-        { name: 'Cadastro', icon: 'server-outline' },
-        { name: 'Estoque', icon: 'layers-outline' },
-        { name: 'Vendas', icon: 'cart-outline' },
-        { name: 'Consulta', icon: 'storefront-outline' },
-        { name: 'Pagamento', icon: 'person-outline' },
-        { name: 'Dashboard', icon: 'analytics-outline' },
-      ];
-    
-    return (
-            <View style={styles2.container}>
-              <View style={styles2.header}>
-                <Text style={styles2.headerText}>Bem Vindo!</Text>
-              </View>
-              <View style={styles2.gridContainer}>
-                {apps.map((app, index) => (
-                  <TouchableOpacity key={index} style={styles2.tile}>
-                    <View style={styles2.tileContent}>
-                      <Ionicons name={app.icon} size={24} color="gray" />
-                      <Text style={styles2.tileText}>{app.name}</Text>
-                    </View>
-                     <View style={styles2.triangle} />
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <TouchableOpacity style={styles2.gearButton}>
-                <Ionicons name="settings-sharp" size={30} color="white" />
-              </TouchableOpacity>
-              <Button 
-                BackgroundColor="#000000"
-                title="Sair"
-                onPress={handleAuthentication}/>
-            </View>
-          );
+        logoutButtonContainer: { 
+            marginTop: 20,
+            alignSelf: 'center',
+            width: '80%',
+        }
+    });
+
+    const router = useRouter();
+
+    const apps = [
+        { name: 'Cadastro', icon: 'server-outline', route: 'Paginas/Cadastro' }, 
+        { name: 'Estoque', icon: 'layers-outline', route: 'Paginas/Estoque' },
+        { name: 'Vendas', icon: 'cart-outline', route: 'Paginas/Vendas' },
+        { name: 'Consulta', icon: 'storefront-outline', route: 'Paginas/Consulta' },
+        { name: 'Pagamento', icon: 'person-outline', route: 'Paginas/Pagamento' },
+        { name: 'Dashboard', icon: 'analytics-outline', route: 'Paginas/Dashboard' },
+    ];
+
+    const handleSettingsPress = () => {
+        console.log("Botão de Configurações pressionado");
+        router.navigate('Settings');
         };
+
+    return (
+        <View style={stylesHome.container}>
+            <View style={stylesHome.header}>
+                <Text style={stylesHome.headerText}>Bem Vindo !</Text>
+            </View>
+            <View style={stylesHome.gridContainer}>
+                {apps.map((app) => (
+                    <TouchableOpacity
+                        key={app.route} 
+                        style={stylesHome.tile}
+                        onPress={() => router.navigate(app.route)}
+                    >
+                        <View style={stylesHome.tileContent}>
+                            <Ionicons name={app.icon} size={40} color="purple" />
+                            <Text style={stylesHome.tileText}>{app.name}</Text>
+                        </View>
+                    </TouchableOpacity>
+                ))}
+            </View>
+            <TouchableOpacity style={stylesHome.gearButton} onPress={handleSettingsPress}>
+                <Ionicons name="settings-sharp" size={30} color="white" />
+            </TouchableOpacity>
+            <View style={stylesHome.logoutButtonContainer}>
+                <Button
+                    color="#d9534f" 
+                    title="Sair"
+                    onPress={handleAuthentication}
+                />
+            </View>
+        </View>
+    );
+};
