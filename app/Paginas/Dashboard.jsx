@@ -1,4 +1,4 @@
-import { View, Text, Button, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from "expo-router";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -68,13 +68,13 @@ const styles = StyleSheet.create({
     }
 });
 
-
-const Estoque = () => {
+const DashBoard = () => {
     const router = useRouter();
 
     const apps = [
-        { name: 'Adicionar Produto', icon: 'add-circle-outline', route: '/Paginas/SubPaginas/AdicionarProduto' },
-        { name: 'Cadastro Produto', icon: 'list-outline', route: '/Paginas/SubPaginas/CadastroProduto' },
+        { name: 'Formas de pagamento mais utilizadas', icon: 'stats-chart-outline', route: '/Paginas/SubPaginas/RankingFormaPagamento' },
+        { name: 'Produtos mais vendidos', icon: 'pricetag-outline', route: '/Paginas/SubPaginas/RankingProdutos' },
+        { name: 'Clientes que mais compraram', icon: 'people-outline', route: '/Paginas/SubPaginas/RankingClientes' },
     ];
 
     const handleVoltar = () => {
@@ -88,31 +88,29 @@ const Estoque = () => {
     return (
         <ScrollView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerText}>Gerenciamento de Estoque</Text>
+                <Text style={styles.headerText}>Dashboard</Text>
             </View>
-
             <View style={styles.gridContainer}>
                 {apps.map((app) => (
                     <TouchableOpacity
                         key={app.route}
                         style={styles.tile}
-                        onPress={() => router.navigate(app.route)}
+                        onPress={() => router.push(app.route)}
                     >
                         <View style={styles.tileIconContainer}>
-                            <Ionicons name={app.icon} size={36} color="#5A5A5A" />
+                            <Ionicons name={app.icon} size={32} color="#5A5A5A" />
                         </View>
                         <Text style={styles.tileText}>{app.name}</Text>
                     </TouchableOpacity>
                 ))}
             </View>
-
-           <View style={styles.backButtonContainer}>
-                           <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
-                               <Text style={styles.backButtonText}>VOLTAR</Text>
-                           </TouchableOpacity>
-                       </View>
+            <View style={styles.backButtonContainer}>
+                <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
+                    <Text style={styles.backButtonText}>VOLTAR</Text>
+                </TouchableOpacity>
+            </View>
         </ScrollView>
     );
 };
 
-export default Estoque;
+export default DashBoard;
