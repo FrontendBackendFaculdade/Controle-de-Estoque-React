@@ -43,7 +43,7 @@ router.get('/condicoes/:codigo', CondicaoPagamento.findCondicao);
 router.put('/atualizarcondicao/:codigo', CondicaoPagamento.updateCondicao);
 router.delete('/deletecondicao/:codigo', CondicaoPagamento.deleteCondicao);
 
-// Rotas das Vendas
+// Rotas das Vendas Feita por Welder
 
 router.post('/createvenda', VendasController.createVenda);
 router.get('/listvendas', VendasController.listVendas);
@@ -52,7 +52,7 @@ router.put('/atualizarvenda/:codigo', VendasController.updateVenda);
 router.delete('/deletevenda/:codigo', VendasController.deleteVenda);
 
 
-// Rotas dos Itens de Vendas
+// Rotas dos Itens de Vendas Feita por Welder
 
 router.post('/createitensvenda', ItensController.createItensVendas);
 router.get('/listitensvendas', ItensController.listItensVendas);
