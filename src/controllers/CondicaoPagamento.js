@@ -119,5 +119,5 @@ export default{
 
 
 
-    // Terminar a função de Update e Delete
+    // Essa controller esta finalizada. Welder
 }
