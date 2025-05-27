@@ -1,1 +1,0 @@
-// Fazer todas as funções conforme as controllers que já foram criadas
