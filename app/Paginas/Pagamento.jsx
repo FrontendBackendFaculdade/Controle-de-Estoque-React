@@ -73,14 +73,9 @@ const Pagamento = () => {
 
     const apps = [
         {
-            name: 'Consultar formas de pagamento',
-            icon: 'card-outline',
-            route: '/Paginas/SubPaginas/ConsultaFormaPagamento'
-        },
-        {
             name: 'Atualizar formas de pagamento',
             icon: 'create-outline',
-            route: '/Paginas/SubPaginas/AtualizarFormaPagamento'
+            route: '/Paginas/Pagamento/AtualizarFormaPagamento'
         },
     ];
 

@@ -71,13 +71,12 @@ const styles = StyleSheet.create({
 const Vendas = () => {
     const router = useRouter();
 
-    const apps = [
+   const apps = [
         {
             name: 'Consultar vendas que já foram feitas',
             icon: 'search-outline',
             route: '/Paginas/SubPaginas/ConsultaVendas'  
         },
-        // Adicione outros botões aqui se quiser
     ];
 
     const handleVoltar = () => {
@@ -92,21 +91,6 @@ const Vendas = () => {
         <ScrollView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerText}>Vendas</Text>
-            </View>
-
-            <View style={styles.gridContainer}>
-                {apps.map((app) => (
-                    <TouchableOpacity
-                        key={app.route}
-                        style={styles.tile}
-                        onPress={() => router.push(app.route)}
-                    >
-                        <View style={styles.tileIconContainer}>
-                            <Ionicons name={app.icon} size={32} color="#5A5A5A" />
-                        </View>
-                        <Text style={styles.tileText}>{app.name}</Text>
-                    </TouchableOpacity>
-                ))}
             </View>
 
             <View style={styles.backButtonContainer}>

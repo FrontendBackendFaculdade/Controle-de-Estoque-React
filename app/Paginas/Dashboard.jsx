@@ -72,9 +72,9 @@ const DashBoard = () => {
     const router = useRouter();
 
     const apps = [
-        { name: 'Formas de pagamento mais utilizadas', icon: 'stats-chart-outline', route: '/Paginas/SubPaginas/RankingFormaPagamento' },
-        { name: 'Produtos mais vendidos', icon: 'pricetag-outline', route: '/Paginas/SubPaginas/RankingProdutos' },
-        { name: 'Clientes que mais compraram', icon: 'people-outline', route: '/Paginas/SubPaginas/RankingClientes' },
+        { name: 'Formas de pagamento mais utilizadas', icon: 'stats-chart-outline', route: '/Paginas/Dashboard/RankingFormaPagamento' },
+        { name: 'Produtos mais vendidos', icon: 'pricetag-outline', route: '/Paginas/Dashboard/RankingProdutos' },
+        { name: 'Clientes que mais compraram', icon: 'people-outline', route: '/Paginas/Dashboard/RankingClientes' },
     ];
 
     const handleVoltar = () => {

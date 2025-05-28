@@ -72,9 +72,9 @@ const Cadastro = () => {
     const router = useRouter();
 
     const apps = [
-        { name: 'Cadastrar Produto', icon: 'add-circle-outline', route: '/Paginas/SubPaginas/CadastroProduto' },
-        { name: 'Cadastrar Forma de Pagamento', icon: 'card-outline', route: '/Paginas/SubPaginas/CadastroFormaPagamento' },
-        { name: 'Cadastrar Cliente', icon: 'person-add-outline', route: '/Paginas/SubPaginas/CadastroCliente' },
+        { name: 'Cadastrar Produto', icon: 'add-circle-outline', route: '/Paginas/Cadastro/CadastroProduto' },
+        { name: 'Cadastrar Forma de Pagamento', icon: 'card-outline', route: '/Paginas/Cadastro/CadastroFormaPagamento' },
+        { name: 'Cadastrar Cliente', icon: 'person-add-outline', route: '/Paginas/Cadastro/CadastroCliente' },
     ];
 
     const handleVoltar = () => {
