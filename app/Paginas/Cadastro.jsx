@@ -73,8 +73,10 @@ const Cadastro = () => {
 
     const apps = [
         { name: 'Cadastrar Produto', icon: 'add-circle-outline', route: '/Paginas/Cadastro/CadastroProduto' },
-        { name: 'Cadastrar Forma de Pagamento', icon: 'card-outline', route: '/Paginas/Cadastro/CadastroFormaPagamento' },
+        { name: 'Cadastrar Pagamento', icon: 'card-outline', route: '/Paginas/Cadastro/CadastroFormaPagamento' },
+        { name: 'Cadastrar Condições', icon: 'card-outline', route: '/Paginas/Cadastro/CadastroCondicoes' },
         { name: 'Cadastrar Cliente', icon: 'person-add-outline', route: '/Paginas/Cadastro/CadastroCliente' },
+        
     ];
 
     const handleVoltar = () => {
