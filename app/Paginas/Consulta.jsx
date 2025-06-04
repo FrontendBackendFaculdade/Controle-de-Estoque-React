@@ -72,8 +72,9 @@ const Consulta = () => {
     const router = useRouter();
 
     const apps = [
-        { name: 'Consultar vendas que já foram feitas', icon: 'search-outline', route: '/Paginas/Consultas/ConsultaVendas' },
-        { name: 'Consultar formas de pagamento', icon: 'search-outline', route: '/Paginas/Consultas/ConsultaFormaPagamento' },
+        { name: 'Vendas realizadas', icon: 'search-outline', route: '/Paginas/Consultas/ConsultaVendas' },
+        { name: 'Formas de pagamento', icon: 'card-outline', route: '/Paginas/Consultas/ConsultaFormaPagamento' },
+        { name: 'Clientes', icon: 'person-add-outline', route: '/Paginas/Consultas/ConsultaClientes' },
 
     ];
 
