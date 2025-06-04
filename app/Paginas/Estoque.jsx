@@ -73,7 +73,7 @@ const Estoque = () => {
     const router = useRouter();
 
     const apps = [
-        { name: 'Adicionar Produto', icon: 'add-circle-outline', route: '/Paginas/Estoque/AdicionarProduto' },
+        { name: 'Atualizar Estoque', icon: 'add-circle-outline', route: '/Paginas/Estoque/AdicionarProduto' },
         { name: 'Visualizar Estoque', icon: 'list-outline', route: '/Paginas/Estoque/VisualizarEstoque' },
     ];
 
