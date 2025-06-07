@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "ERP_Mobile",
-    "slug": "ERP_Mobile",
+    "name": "ERP",
+    "slug": "ERP",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/ERP.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -21,7 +21,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/ERP.png"
     },
     "plugins": [
       "expo-router",
