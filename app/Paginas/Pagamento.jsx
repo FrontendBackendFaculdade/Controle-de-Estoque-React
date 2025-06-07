@@ -72,7 +72,8 @@ const Pagamento = () => {
     const router = useRouter();
 
     const apps = [
-        { name: 'Atualizar formas de pagamento', icon: 'create-outline', route: '/Paginas/Pagamento/AtualizarFormaPagamento' },
+        { name: 'Formas de pagamento', icon: 'create-outline', route: '/Paginas/Pagamento/AtualizarFormaPagamento' },
+        { name: 'Condições de Pagamento', icon: 'create-outline', route: '/Paginas/Pagamento/AtualizarCondicoes' }
     ];
 
     const handleVoltar = () => {
