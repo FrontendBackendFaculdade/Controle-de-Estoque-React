@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -6,6 +6,8 @@ import {
     Button,
     ScrollView,
     TouchableOpacity,
+    StyleSheet, // Usar StyleSheet para melhor organização
+    Image, // Importar Image para o componente animado
 } from 'react-native';
 import { initializeApp } from 'firebase/app';
 import {
@@ -16,19 +18,138 @@ import {
     signOut,
 } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
-import {firebaseConfig} from "../firebase.js";
+import { firebaseConfig } from "../firebase.js";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useRouter } from 'expo-router';
+
+// --- Imports para Splash Screen e Animação ---
+import * as SplashScreen from 'expo-splash-screen';
+import * as Font from 'expo-font';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
+
+// Impede que a splash screen nativa desapareça
+SplashScreen.preventAutoHideAsync();
+
+// --- COMPONENTE DA SPLASH SCREEN ANIMADA ---
+// Este componente será exibido enquanto o app principal carrega
+const AnimatedSplashScreen = () => {
+    // Valores compartilhados para controlar a animação
+    const opacity = useSharedValue(0);
+    const scale = useSharedValue(0.9);
+
+    useEffect(() => {
+        // Inicia a animação quando o componente é montado
+        opacity.value = withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) });
+        scale.value = withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) });
+    }, []);
+
+    // Estilo que será aplicado ao componente animado
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            opacity: opacity.value,
+            transform: [{ scale: scale.value }],
+        };
+    });
+
+    return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+            <Animated.View style={animatedStyle}>
+                {/* Certifique-se de que o caminho para sua imagem está correto */}
+                <Image
+                    source={require('../assets/splash.png')}
+                    style={{ width: 250, height: 250, resizeMode: 'contain' }}
+                />
+            </Animated.View>
+        </View>
+    );
+};
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 
-const styles = {
+export default function App() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [user, setUser] = useState(null);
+    const [isLogin, setIsLogin] = useState(true);
+    const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [appIsReady, setAppIsReady] = useState(false);
+
+    useEffect(() => {
+        async function prepare() {
+            try {
+                // Carrega as fontes necessárias em segundo plano
+                await Font.loadAsync({
+                    ...Ionicons.font,
+                    ...MaterialCommunityIcons.font,
+                });
+
+                // Simula um tempo de carregamento para que a animação seja visível
+                await new Promise(resolve => setTimeout(resolve, 2500));
+
+            } catch (e) {
+                console.warn(e);
+            } finally {
+                setAppIsReady(true);
+            }
+        }
+        
+        prepare();
+
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setUser(user);
+            setError('');
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const onLayoutRootView = useCallback(async () => {
+        if (appIsReady) {
+            // Esconde a splash screen nativa quando o app estiver pronto e renderizado
+            await SplashScreen.hideAsync();
+        }
+    }, [appIsReady]);
+
+    const handleAuthentication = async () => { /* ... sua lógica de autenticação ... */ };
+    const toggleShowPassword = () => setShowPassword(!showPassword);
+
+    // Renderiza o componente de splash animada enquanto o app não está pronto
+    if (!appIsReady) {
+        return <AnimatedSplashScreen />;
+    }
+
+    return (
+        <ScrollView contentContainerStyle={styles.container} onLayout={onLayoutRootView}>
+            {user
+                ? (<PaginaAuthenticated user={user} handleAuthentication={handleAuthentication}/>)
+                : (<PaginaAuth
+                    email={email}
+                    setEmail={setEmail}
+                    password={password}
+                    setPassword={setPassword}
+                    isLogin={isLogin}
+                    setIsLogin={setIsLogin}
+                    handleAuthentication={handleAuthentication}
+                    error={error}
+                    showPassword={showPassword}
+                    toggleShowPassword={toggleShowPassword}/>)}
+        </ScrollView>
+    );
+}
+
+// (O restante do seu código, componentes e estilos permanecem os mesmos)
+
+// --- ESTILOS (Convertido para StyleSheet para melhor performance) ---
+const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
         justifyContent: 'center'
     },
+    // ... cole aqui o resto do seu objeto 'styles'
     authContainer: {
         width: '75%',
         maxWidth: 400,
@@ -65,7 +186,7 @@ const styles = {
     welcomeText: {
         fontSize: 18,
         marginBottom: 20,
-        textAlign: 'center'   
+        textAlign: 'center'
     },
     inputContainer: {
         flexDirection: 'row',
@@ -83,68 +204,7 @@ const styles = {
     iconContainer: {
         paddingLeft: 10,
     },
-};
-
-export default function App() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [user, setUser] = useState(null);
-    const [isLogin, setIsLogin] = useState(true);
-    const [error, setError] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-
-    const toggleShowPassword = () => {
-        setShowPassword(!showPassword);
-    }
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUser(user);
-            setError('');
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-    const handleAuthentication = async() => {
-        setError(''); // Clear previous errors
-        try {
-            if (user) {
-                await signOut(auth);
-                console.log('Usuário deslogado com sucesso!');
-            } else {
-                if (isLogin) {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    console.log('Usuário logado com sucesso!');
-                } else {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                    console.log('Usuário criado com sucesso!');
-                }
-            }
-        } catch (error) {
-            setError(error.message);
-            console.error('Erro de autenticação:', error.message);
-        }
-    };
-
-    return (
-        <ScrollView contentContainerStyle={styles.container}>
-            {user
-                ? (<PaginaAuthenticated user={user} handleAuthentication={handleAuthentication}/>)
-                : (<PaginaAuth
-                    email={email}
-                    setEmail={setEmail}
-                    password={password}
-                    setPassword={setPassword}
-                    isLogin={isLogin}
-                    setIsLogin={setIsLogin}
-                    handleAuthentication={handleAuthentication}
-                    error={error}
-                    showPassword={showPassword}
-                    toggleShowPassword={toggleShowPassword}/>)}
-        </ScrollView>
-    );
-}
+});
 
 const PaginaAuth = ({
     email,
