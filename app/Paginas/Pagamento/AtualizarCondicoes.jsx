@@ -140,7 +140,7 @@ const AtualizarCondicaoPagamento = () => {
                                     onValueChange={(itemValue) => handleSelecaoCondicao(itemValue)}
                                     style={styles.picker}
                                 >
-                                    <Picker.Item label="Por Descrição..." value="" />
+                                    <Picker.Item label="Por Nome..." value="" />
                                     {listaCondicoes.map((cond) => (
                                         <Picker.Item key={cond.codigo} label={cond.descricao} value={cond.codigo}/>
                                     ))}

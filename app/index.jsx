@@ -6,8 +6,8 @@ import {
     Button,
     ScrollView,
     TouchableOpacity,
-    StyleSheet, // Usar StyleSheet para melhor organização
-    Image, // Importar Image para o componente animado
+    StyleSheet,
+    Modal,
 } from 'react-native';
 import { initializeApp } from 'firebase/app';
 import {
@@ -21,53 +21,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { firebaseConfig } from "../firebase.js";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useRouter } from 'expo-router';
-
-// --- Imports para Splash Screen e Animação ---
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 
-// Impede que a splash screen nativa desapareça
 SplashScreen.preventAutoHideAsync();
-
-// --- COMPONENTE DA SPLASH SCREEN ANIMADA ---
-// Este componente será exibido enquanto o app principal carrega
-const AnimatedSplashScreen = () => {
-    // Valores compartilhados para controlar a animação
-    const opacity = useSharedValue(0);
-    const scale = useSharedValue(0.9);
-
-    useEffect(() => {
-        // Inicia a animação quando o componente é montado
-        opacity.value = withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) });
-        scale.value = withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) });
-    }, []);
-
-    // Estilo que será aplicado ao componente animado
-    const animatedStyle = useAnimatedStyle(() => {
-        return {
-            opacity: opacity.value,
-            transform: [{ scale: scale.value }],
-        };
-    });
-
-    return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
-            <Animated.View style={animatedStyle}>
-                {/* Certifique-se de que o caminho para sua imagem está correto */}
-                <Image
-                    source={require('../assets/splash.png')}
-                    style={{ width: 250, height: 250, resizeMode: 'contain' }}
-                />
-            </Animated.View>
-        </View>
-    );
-};
-
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-
 
 export default function App() {
     const [email, setEmail] = useState('');
@@ -81,52 +41,62 @@ export default function App() {
     useEffect(() => {
         async function prepare() {
             try {
-                // Carrega as fontes necessárias em segundo plano
                 await Font.loadAsync({
                     ...Ionicons.font,
                     ...MaterialCommunityIcons.font,
                 });
-
-                // Simula um tempo de carregamento para que a animação seja visível
-                await new Promise(resolve => setTimeout(resolve, 2500));
-
             } catch (e) {
                 console.warn(e);
             } finally {
                 setAppIsReady(true);
             }
         }
-        
         prepare();
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
             setError('');
         });
-
         return () => unsubscribe();
     }, []);
 
     const onLayoutRootView = useCallback(async () => {
         if (appIsReady) {
-            // Esconde a splash screen nativa quando o app estiver pronto e renderizado
             await SplashScreen.hideAsync();
         }
     }, [appIsReady]);
 
-    const handleAuthentication = async () => { /* ... sua lógica de autenticação ... */ };
-    const toggleShowPassword = () => setShowPassword(!showPassword);
+    const toggleShowPassword = () => {
+        setShowPassword(!showPassword);
+    }
 
-    // Renderiza o componente de splash animada enquanto o app não está pronto
+    const handleAuthentication = async () => {
+        setError('');
+        try {
+            if (user) {
+                await signOut(auth);
+            } else {
+                if (isLogin) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                }
+            }
+        } catch (e) {
+            setError(e.message);
+        }
+    };
+
     if (!appIsReady) {
-        return <AnimatedSplashScreen />;
+        return null;
     }
 
     return (
         <ScrollView contentContainerStyle={styles.container} onLayout={onLayoutRootView}>
-            {user
-                ? (<PaginaAuthenticated user={user} handleAuthentication={handleAuthentication}/>)
-                : (<PaginaAuth
+            {user ? (
+                <PaginaAuthenticated handleAuthentication={handleAuthentication} />
+            ) : (
+                <PaginaAuth
                     email={email}
                     setEmail={setEmail}
                     password={password}
@@ -136,205 +106,20 @@ export default function App() {
                     handleAuthentication={handleAuthentication}
                     error={error}
                     showPassword={showPassword}
-                    toggleShowPassword={toggleShowPassword}/>)}
+                    toggleShowPassword={toggleShowPassword}
+                />
+            )}
         </ScrollView>
     );
 }
 
-// (O restante do seu código, componentes e estilos permanecem os mesmos)
-
-// --- ESTILOS (Convertido para StyleSheet para melhor performance) ---
-const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        justifyContent: 'center'
-    },
-    // ... cole aqui o resto do seu objeto 'styles'
-    authContainer: {
-        width: '75%',
-        maxWidth: 400,
-        alignSelf: 'center'
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center'
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        marginBottom: 10,
-        borderRadius: 5
-    },
-    buttonContainer: {
-        marginVertical: 10
-    },
-    bottomContainer: {
-        marginTop: 20
-    },
-    toggleText: {
-        color: '#3498db',
-        textAlign: 'center'
-    },
-    errorText: {
-        color: 'red',
-        marginBottom: 10,
-        textAlign: 'center'
-    },
-    welcomeText: {
-        fontSize: 18,
-        marginBottom: 20,
-        textAlign: 'center'
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        marginBottom: 10,
-        borderRadius: 5,
-    },
-    inputField: {
-        flex: 1,
-        padding: 0,
-    },
-    iconContainer: {
-        paddingLeft: 10,
-    },
-});
-
-const PaginaAuth = ({
-    email,
-    setEmail,
-    password,
-    setPassword,
-    isLogin,
-    setIsLogin,
-    handleAuthentication,
-    error,
-    showPassword,
-    toggleShowPassword
-}) => {
-    return (
-        <View style={styles.authContainer}>
-            <Text style={styles.title}>{isLogin ? 'Login' : 'Cadastrar'}</Text>
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-            <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Email"
-                autoCapitalize="none"
-                keyboardType="email-address"
-            />
-            <View style={styles.inputContainer}>
-                <TextInput
-                    style={styles.inputField}
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="Senha"
-                    secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity onPress={toggleShowPassword} style={styles.iconContainer}>
-                    <MaterialCommunityIcons
-                        name={showPassword ? 'eye-off' : 'eye'}
-                        size={24}
-                        color="#aaa"
-                    />
-                </TouchableOpacity>
-            </View>
-            <View style={styles.buttonContainer}>
-                <Button
-                    title={isLogin ? 'Entrar' : 'Inscrever-se'}
-                    onPress={handleAuthentication}
-                    color="#3498db"
-                />
-            </View>
-            <View style={styles.bottomContainer}>
-                <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-                    <Text style={styles.toggleText}>
-                        {isLogin
-                            ? 'Precisa de uma conta? Cadastre-se'
-                            : 'Já tem uma conta? Faça login'}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
-};
-
-const PaginaAuthenticated = ({handleAuthentication, navigation }) => { 
-    
-    const stylesHome = ({ 
-        container: {
-            flex: 1,
-            backgroundColor: '#f0f0f0',
-            padding: 10,
-        },
-        header: {
-            padding: 10,
-            marginBottom: 10,
-        },
-        headerText: {
-            fontSize: 24,
-            fontWeight: 'bold',
-        },
-        gridContainer: {
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'space-around',
-        },
-        tile: {
-            width: '45%',
-            height: 150,
-            backgroundColor: 'white',
-            borderRadius: 10,
-            marginBottom: 20,
-            justifyContent: 'flex-start', 
-            alignItems: 'center',
-            borderColor: 'gray',
-            borderWidth: 2,
-            padding: 10,
-        },
-        tileContent: {
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            height: '100%',
-        },
-        tileText: {
-            fontSize: 16, // Ajustado para caber melhor
-            fontWeight: 'bold',
-            marginTop: 10,
-            textAlign: 'center', // Para nomes de app mais longos
-        },
-        gearButton: {
-            position: 'absolute', 
-            bottom: 20,
-            alignSelf: 'center', 
-            backgroundColor: '#2196F3',
-            width: 60,
-            height: 60,
-            borderRadius: 30,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 20, 
-        },
-        logoutButtonContainer: { 
-            marginTop: 20,
-            alignSelf: 'center',
-            width: '80%',
-        }
-    });
-
+const PaginaAuthenticated = ({ handleAuthentication }) => {
     const router = useRouter();
+    const [themeColor, setThemeColor] = useState('purple');
+    const [isSettingsModalVisible, setSettingsModalVisible] = useState(false);
 
     const apps = [
-        { name: 'Cadastro', icon: 'server-outline', route: 'Paginas/Cadastro' }, 
+        { name: 'Cadastro', icon: 'server-outline', route: 'Paginas/Cadastro' },
         { name: 'Estoque', icon: 'layers-outline', route: 'Paginas/Estoque' },
         { name: 'Vendas', icon: 'cart-outline', route: 'Paginas/Vendas' },
         { name: 'Consulta', icon: 'storefront-outline', route: 'Paginas/Consulta' },
@@ -342,36 +127,74 @@ const PaginaAuthenticated = ({handleAuthentication, navigation }) => {
         { name: 'Dashboard', icon: 'analytics-outline', route: 'Paginas/Dashboard' },
     ];
 
-    const handleSettingsPress = () => {
-        console.log("Botão de Configurações pressionado");
-        router.navigate('Settings');
-        };
+    const themeOptions = [
+      { name: 'Roxo (Padrão)', value: 'purple' },
+      { name: 'Azul Clássico', value: '#2196F3' },
+      { name: 'Verde Esmeralda', value: '#4CAF50' },
+      { name: 'Laranja Vibrante', value: '#FF9800' },
+      { name: 'Vermelho Intenso', value: '#F44336' },
+    ];
 
     return (
         <View style={stylesHome.container}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isSettingsModalVisible}
+                onRequestClose={() => setSettingsModalVisible(false)}
+            >
+                <View style={settingsStyles.modalContainer}>
+                    <View style={settingsStyles.modalContent}>
+                        <Text style={settingsStyles.title}>Personalizar Cores</Text>
+                        {themeOptions.map((color) => (
+                            <TouchableOpacity
+                                key={color.value}
+                                style={[
+                                    settingsStyles.colorOption,
+                                    { borderColor: themeColor === color.value ? color.value : 'transparent' },
+                                ]}
+                                onPress={() => setThemeColor(color.value)}
+                            >
+                                <View style={[settingsStyles.colorSwatch, { backgroundColor: color.value }]} />
+                                <Text style={settingsStyles.colorName}>{color.name}</Text>
+                            </TouchableOpacity>
+                        ))}
+                        <TouchableOpacity
+                            style={settingsStyles.backButton}
+                            onPress={() => setSettingsModalVisible(false)}
+                        >
+                            <Text style={settingsStyles.backButtonText}>Fechar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
             <View style={stylesHome.header}>
-                <Text style={stylesHome.headerText}>Bem Vindo !</Text>
+                <Text style={stylesHome.headerText}>Bem Vindo!</Text>
             </View>
             <View style={stylesHome.gridContainer}>
                 {apps.map((app) => (
-                    <TouchableOpacity
-                        key={app.route} 
+                    <TouchableOpacity 
+                        key={app.name} 
                         style={stylesHome.tile}
-                        onPress={() => router.navigate(app.route)}
+                        onPress={() => router.push(app.route)}
                     >
                         <View style={stylesHome.tileContent}>
-                            <Ionicons name={app.icon} size={40} color="purple" />
+                            <Ionicons name={app.icon} size={40} color={themeColor} />
                             <Text style={stylesHome.tileText}>{app.name}</Text>
                         </View>
                     </TouchableOpacity>
                 ))}
             </View>
-            <TouchableOpacity style={stylesHome.gearButton} onPress={handleSettingsPress}>
+            <TouchableOpacity
+                style={[stylesHome.gearButton, { backgroundColor: themeColor }]}
+                onPress={() => setSettingsModalVisible(true)}
+            >
                 <Ionicons name="settings-sharp" size={30} color="white" />
             </TouchableOpacity>
             <View style={stylesHome.logoutButtonContainer}>
                 <Button
-                    color="#d9534f" 
+                    color="#d9534f"
                     title="Sair"
                     onPress={handleAuthentication}
                 />
@@ -379,3 +202,62 @@ const PaginaAuthenticated = ({handleAuthentication, navigation }) => {
         </View>
     );
 };
+
+const PaginaAuth = ({ email, setEmail, password, setPassword, isLogin, setIsLogin, handleAuthentication, error, showPassword, toggleShowPassword }) => (
+    <View style={styles.authContainer}>
+        <Text style={styles.title}>{isLogin ? 'Login' : 'Cadastrar'}</Text>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="Email" autoCapitalize="none" keyboardType="email-address" />
+        <View style={styles.inputContainer}>
+            <TextInput style={styles.inputField} value={password} onChangeText={setPassword} placeholder="Senha" secureTextEntry={!showPassword} />
+            <TouchableOpacity onPress={toggleShowPassword} style={styles.iconContainer}>
+                <MaterialCommunityIcons name={showPassword ? 'eye-off' : 'eye'} size={24} color="#aaa" />
+            </TouchableOpacity>
+        </View>
+        <View style={styles.buttonContainer}>
+            <Button title={isLogin ? 'Entrar' : 'Inscrever-se'} onPress={handleAuthentication} color="#3498db" />
+        </View>
+        <View style={styles.bottomContainer}>
+            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+                <Text style={styles.toggleText}>{isLogin ? 'Precisa de uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+);
+
+const styles = StyleSheet.create({
+    container: { flexGrow: 1, justifyContent: 'center' },
+    authContainer: { width: '75%', maxWidth: 400, alignSelf: 'center' },
+    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+    input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 10, borderRadius: 5 },
+    buttonContainer: { marginVertical: 10 },
+    bottomContainer: { marginTop: 20 },
+    toggleText: { color: '#3498db', textAlign: 'center' },
+    errorText: { color: 'red', marginBottom: 10, textAlign: 'center' },
+    inputContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 10, borderRadius: 5 },
+    inputField: { flex: 1, padding: 0 },
+    iconContainer: { paddingLeft: 10 },
+});
+
+const stylesHome = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#f0f0f0', padding: 10 },
+    header: { padding: 10, marginBottom: 10 },
+    headerText: { fontSize: 24, fontWeight: 'bold' },
+    gridContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' },
+    tile: { width: '45%', height: 150, backgroundColor: 'white', borderRadius: 10, marginBottom: 20, justifyContent: 'center', alignItems: 'center', borderColor: 'gray', borderWidth: 2, padding: 10 },
+    tileContent: { justifyContent: 'center', alignItems: 'center' },
+    tileText: { fontSize: 16, fontWeight: 'bold', marginTop: 10, textAlign: 'center' },
+    gearButton: { position: 'absolute', bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 },
+    logoutButtonContainer: { marginTop: 40, alignSelf: 'center', width: '80%' }
+});
+
+const settingsStyles = StyleSheet.create({
+    modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+    modalContent: { width: '90%', backgroundColor: '#f9f9f9', borderRadius: 20, padding: 25, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 5 },
+    title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, textAlign: 'center', color: '#333' },
+    colorOption: { flexDirection: 'row', alignItems: 'center', padding: 12, width: '100%', marginBottom: 10, borderRadius: 12, backgroundColor: 'white', borderWidth: 3 },
+    colorSwatch: { width: 30, height: 30, borderRadius: 15, marginRight: 20, borderWidth: 1, borderColor: '#eee' },
+    colorName: { fontSize: 18, fontWeight: '500' },
+    backButton: { marginTop: 20, backgroundColor: '#6c757d', paddingVertical: 14, borderRadius: 12, width: '100%' },
+    backButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16, textAlign: 'center' },
+});

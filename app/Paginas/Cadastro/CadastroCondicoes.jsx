@@ -1,59 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { useRouter } from "expo-router";
+import { Picker } from '@react-native-picker/picker';
 
 const CadastroCondicaoPagamento = () => {
     const router = useRouter();
-    const [codPagamento, setCodPagamento] = React.useState('');
-    const [quantidadeParcela, setQuantidadeParcela] = React.useState('');
-    const [parcelaInicial, setParcelaInicial] = React.useState('');
-    const [intervaloParcelas, setIntervaloParcelas] = React.useState('');
-    const [descricao, setDescricao] = React.useState('');
-    const [loading, setLoading] = React.useState(false);
+    const [formasPagamento, setFormasPagamento] = useState([]);
+    const [codFormaPagamento, setCodFormaPagamento] = useState(null);
+    const [nomeFormaPagamento, setNomeFormaPagamento] = useState('');
+    const [quantidadeParcela, setQuantidadeParcela] = useState('');
+    const [parcelaInicial, setParcelaInicial] = useState('');
+    const [intervaloParcelas, setIntervaloParcelas] = useState('');
+    const [descricao, setDescricao] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const verificarCondicaoExistente = async (codigoStr) => {
-        const codigoNum = parseInt(codigoStr, 10);
-        if (isNaN(codigoNum)) {
-            console.warn('Código da condição inválido para verificação.');
-            return false;
-        }
-
-        try {
-            const response = await fetch('https://backend-do-controle-de-estoque.onrender.com/listcondicoes');
-            if (!response.ok) {
-                console.warn('Não foi possível buscar condições de pagamento existentes para verificação.');
-                return false;
+    useEffect(() => {
+        const buscarFormasPagamento = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch('https://backend-do-controle-de-estoque.onrender.com/listformas');
+                if (!response.ok) {
+                    throw new Error('Não foi possível carregar as formas de pagamento.');
+                }
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    setFormasPagamento(data);
+                }
+            } catch (error) {
+                Alert.alert('Erro', error.message);
+                console.error('Erro ao buscar formas de pagamento:', error);
+            } finally {
+                setLoading(false);
             }
-            const condicoesExistentes = await response.json();
+        };
 
-            if (Array.isArray(condicoesExistentes)) {
-                return condicoesExistentes.some(cond => cond.codPagamento === codigoNum);
-            }
-            return false;
-        } catch (error) {
-            console.error('Erro ao verificar condição de pagamento existente:', error);
-            return false;
-        }
-    };
+        buscarFormasPagamento();
+    }, []);
 
     const handleSalvar = async () => {
-        const codPagamentoTrimmed = codPagamento.trim();
         const descricaoTrimmed = descricao.trim();
 
-        if (!codPagamentoTrimmed || !quantidadeParcela.trim() || !parcelaInicial.trim() || !intervaloParcelas.trim() || !descricaoTrimmed) {
+        if (!codFormaPagamento || !quantidadeParcela.trim() || !parcelaInicial.trim() || !intervaloParcelas.trim() || !descricaoTrimmed) {
             Alert.alert('Erro', 'Preencha todos os campos!');
             return;
         }
 
-        const numCodPagamento = parseInt(codPagamentoTrimmed, 10);
         const numQuantidadeParcela = parseInt(quantidadeParcela, 10);
         const numParcelaInicial = parseInt(parcelaInicial, 10);
         const numIntervaloParcelas = parseInt(intervaloParcelas, 10);
 
-        if (isNaN(numCodPagamento)) {
-            Alert.alert('Erro', 'Código da Condição deve ser um número válido.');
-            return;
-        }
         if (isNaN(numQuantidadeParcela) || isNaN(numParcelaInicial) || isNaN(numIntervaloParcelas)) {
             Alert.alert('Erro', 'Quantidade de parcelas, parcela inicial e intervalo devem ser números válidos.');
             return;
@@ -61,15 +56,8 @@ const CadastroCondicaoPagamento = () => {
 
         setLoading(true);
 
-        const condicaoJaExiste = await verificarCondicaoExistente(codPagamentoTrimmed);
-        if (condicaoJaExiste) {
-            setLoading(false);
-            Alert.alert('Erro', 'Uma condição de pagamento com este código já está cadastrada.');
-            return;
-        }
-
         const condicaoPagamentoData = {
-            codPagamento: numCodPagamento,
+            codPagamento: codFormaPagamento,
             quantidadeParcela: numQuantidadeParcela,
             parcelaInicial: numParcelaInicial,
             intervaloParcelas: numIntervaloParcelas,
@@ -79,23 +67,19 @@ const CadastroCondicaoPagamento = () => {
         try {
             const response = await fetch('https://backend-do-controle-de-estoque.onrender.com/createcondicao', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(condicaoPagamentoData),
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido ao processar a resposta do servidor.' }));
-                setLoading(false);
-                Alert.alert('Erro ao Cadastrar', `Falha ao salvar condição de pagamento: ${errorData.message || response.status}`);
-                return;
+                const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
+                throw new Error(errorData.message || `Erro do servidor: ${response.status}`);
             }
 
-            await response.json();
             setLoading(false);
             Alert.alert('Sucesso', 'Condição de pagamento cadastrada com sucesso!');
-            setCodPagamento('');
+            setCodFormaPagamento(null);
+            setNomeFormaPagamento('');
             setQuantidadeParcela('');
             setParcelaInicial('');
             setIntervaloParcelas('');
@@ -103,8 +87,18 @@ const CadastroCondicaoPagamento = () => {
 
         } catch (error) {
             setLoading(false);
-            Alert.alert('Erro de Rede', 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.');
+            Alert.alert('Erro ao Salvar', error.message);
             console.error(error);
+        }
+    };
+
+    const handlePickerChange = (itemValue, itemIndex) => {
+        setCodFormaPagamento(itemValue);
+        if (itemValue) {
+            const formaSelecionada = formasPagamento.find(f => f.codigo === itemValue);
+            setNomeFormaPagamento(formaSelecionada ? formaSelecionada.nome : '');
+        } else {
+            setNomeFormaPagamento('');
         }
     };
 
@@ -112,16 +106,29 @@ const CadastroCondicaoPagamento = () => {
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
             <View style={styles.container}>
                 <Text style={styles.headerText}>Cadastro de Condições de Pagamento</Text>
+
+                <View style={styles.pickerContainer}>
+                    <Picker
+                        selectedValue={codFormaPagamento}
+                        onValueChange={handlePickerChange}
+                        enabled={!loading && formasPagamento.length > 0}
+                        style={styles.picker}
+                    >
+                        <Picker.Item label="Selecione uma Forma de Pagamento..." value={null} />
+                        {formasPagamento.map((forma) => (
+                            <Picker.Item key={forma.codigo} label={forma.nome} value={forma.codigo} />
+                        ))}
+                    </Picker>
+                </View>
+
+                {nomeFormaPagamento ? (
+                    <Text style={styles.infoText}>
+                        Condição para: <Text style={styles.infoTextBold}>{nomeFormaPagamento}</Text>
+                    </Text>
+                ) : null}
+
                 <TextInput
-                    placeholder="Código da Condição (ex: 1, 2, 30)"
-                    style={styles.input}
-                    value={codPagamento}
-                    onChangeText={setCodPagamento}
-                    editable={!loading}
-                    keyboardType="numeric"
-                />
-                <TextInput
-                    placeholder="Descrição (ex: 3 Parcelas Iguais)"
+                    placeholder="Descrição (ex: 3x Sem Juros no Cartão)"
                     style={styles.input}
                     value={descricao}
                     onChangeText={setDescricao}
@@ -185,6 +192,27 @@ const styles = StyleSheet.create({
         marginBottom: 25,
         textAlign: 'center',
         color: '#333'
+    },
+    pickerContainer: {
+        width: '100%',
+        backgroundColor: 'white',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        marginBottom: 12,
+    },
+    picker: {
+        width: '100%',
+        height: 50,
+    },
+    infoText: {
+        fontSize: 16,
+        color: '#555',
+        marginBottom: 15,
+    },
+    infoTextBold: {
+        fontWeight: 'bold',
+        color: '#333',
     },
     input: {
         backgroundColor: 'white',

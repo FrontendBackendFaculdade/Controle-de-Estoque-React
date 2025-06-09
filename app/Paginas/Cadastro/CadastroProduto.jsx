@@ -82,7 +82,7 @@ const CadastroProduto = () => {
 
         if (!nomeProdutoTrimmed || !tipoUnidadeTrimmed || !setorTrimmed ||
             !quantidade.trim() || !custoCompra.trim() || !margemLucro.trim() ||
-            !precoDeVenda.trim() || !ativo) {
+            !precoDeVenda.trim()) {
             Alert.alert('Erro', 'Preencha todos os campos!');
             return;
         }

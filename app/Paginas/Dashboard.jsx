@@ -72,8 +72,8 @@ const DashBoard = () => {
     const router = useRouter();
 
     const apps = [
-        { name: 'Formas de pagamento mais utilizadas', icon: 'stats-chart-outline', route: '/Paginas/Dashboard/RankingFormaPagamento' },
-        { name: 'Produtos mais vendidos', icon: 'pricetag-outline', route: '/Paginas/Dashboard/RankingProdutos' },
+        { name: 'Formas de pagamento', icon: 'stats-chart-outline', route: '/Paginas/Dashboard/RankingFormaPagamento' },
+        { name: 'Curva ABC Vendas', icon: 'pricetag-outline', route: '/Paginas/Dashboard/RankingProdutos' },
         { name: 'Clientes que mais compraram', icon: 'people-outline', route: '/Paginas/Dashboard/RankingClientes' },
     ];
 
